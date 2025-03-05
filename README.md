@@ -15,7 +15,7 @@
 1. 需要安装 FFmpeg 并释放在环境变量中：
 
 2. 克隆此仓库：
-   git clone https://github.com/yourusername/applemusic2flac.git
+   git clone https://github.com/Next-Page-Vi/applemusic2flac.git
    
 ## 饼
 
