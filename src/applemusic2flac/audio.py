@@ -2,7 +2,7 @@
 import subprocess
 
 
-def convert_to_flac(src_file: str, dst_file: str, bit_depth: int, track_tags:dict):
+def convert_to_flac(src_file: str, dst_file: str, bit_depth: int, track_tags:dict) -> None:
     sample_fmt = "s16" if bit_depth == 16 else "s32"
     cmd = [
         "ffmpeg", 

@@ -1,14 +1,16 @@
 # applemusic2flac/__main__.py
-# -*- coding: utf-8 -*-
+"""Main entry point for the applemusic2flac conversion tool."""
 import os
-import sys
 import shutil
-from .metadata import ffprobe_get_metadata, extract_tags_from_metadata,parse_number, get_channels_and_samplerate
+import sys
+
 from .audio import convert_to_flac
 from .framedepth import detect_true_bit_depth
+from .metadata import extract_tags_from_metadata, ffprobe_get_metadata, get_channels_and_samplerate
 from .utils import make_safe_filename
 
-def main(source_dir: str, dest_dir: str):
+
+def main(source_dir: str, dest_dir: str) -> None:
     m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir) 
                  for f in files if f.lower().endswith(".m4a")]
     if not m4a_files:
@@ -31,12 +33,12 @@ def main(source_dir: str, dest_dir: str):
         track_tags = extract_tags_from_metadata(meta)
         channels, _ = get_channels_and_samplerate(meta)
         true_depth = detect_true_bit_depth(file_path, channels)
-        '''
+        """
         tracknumber = parse_number(track_tags["tracknumber"])[0]
         discnumber = parse_number(track_tags["discnumber"])[0]
         print(parse_number(track_tags["discnumber"])[1])
         print(track_tags["totaldiscs"])
-        '''
+        """
 
         track_title = track_tags["title"] or os.path.splitext(os.path.basename(file_path))[0]
         dst_filename = make_safe_filename(f"{track_tags["discnumber"]}.{track_tags["tracknumber"]}.{track_title}.flac")

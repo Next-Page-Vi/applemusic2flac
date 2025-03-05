@@ -15,3 +15,44 @@ applemusic2flac = "applemusic2flac:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL", "UP007"]
+preview = true
+explicit-preview-rules = true
+ignore = [
+    "UP045",    # 允许使用 optional
+    "ERA001",   # 允许注释的 python 代码
+    "S101",     # 允许使用 assert
+    "COM812",   # formatter 会强制 dict 末尾保留逗号, 不需要该规则
+    "ASYNC230", # asyncio 目前不支持异步打开文件
+    "D400",     # 文档的第一行不需要 . 结尾
+    "N818",     # 异常不一定要以 Error 结尾
+    "ANN401",   # 允许使用 any
+    "TID252",   # 允许从父模块导入
+    "PLR0913",  # 允许参数超过 5 个
+    "PLR0911",  # 允许 6 条以上的返回语句
+    "FIX",      # 允许 TODO 等需要 FIX 的注释
+    "TD003",    # 允许 TODO 后面不跟着 url
+    "TRY002",   # 允许创建普通的 Exception
+]
+pydocstyle = { convention = 'numpy' }
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+plugins = "pydantic.mypy"
+exclude = ["^deps/*", "^workdir/*", "^docker-workdir/*"]
