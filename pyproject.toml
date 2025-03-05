@@ -1,0 +1,17 @@
+[project]
+name = "applemusic2flac"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Next_Page", email = "52558763+Next-Page-Vi@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+applemusic2flac = "applemusic2flac:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
