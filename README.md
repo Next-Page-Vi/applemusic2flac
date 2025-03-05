@@ -17,3 +17,9 @@
 2. 克隆此仓库：
    git clone https://github.com/yourusername/applemusic2flac.git
    
+## 饼
+
+- [ ] 自定义命名方式以符合其他拍脑门定下命名规则的站点；
+- [ ] 输出 Gazelle Json；
+- [ ] 输出频谱图并自动上传到图床（你可以结合 propolis 实现）；
+- [ ] 自动填写表单到 NexusPHP 架构的站点。
