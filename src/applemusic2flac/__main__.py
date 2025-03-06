@@ -33,13 +33,6 @@ def main(source_dir: str, dest_dir: str) -> None:
         track_tags = extract_tags_from_metadata(meta)
         channels, _ = get_channels_and_samplerate(meta)
         true_depth = detect_true_bit_depth(file_path, channels)
-        """
-        tracknumber = parse_number(track_tags["tracknumber"])[0]
-        discnumber = parse_number(track_tags["discnumber"])[0]
-        print(parse_number(track_tags["discnumber"])[1])
-        print(track_tags["totaldiscs"])
-        """
-
         track_title = track_tags["title"] or os.path.splitext(os.path.basename(file_path))[0]
         dst_filename = make_safe_filename(f"{track_tags["discnumber"]}.{track_tags["tracknumber"]}.{track_title}.flac")
         dst_file_path = os.path.join(target_dir, dst_filename)
