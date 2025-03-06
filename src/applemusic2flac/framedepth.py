@@ -1,5 +1,6 @@
 import subprocess
-from typing import List, Optional
+from typing import Optional
+
 
 def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_000) -> int:
     """检测音频文件的真实比特深度(16位或24位)。
@@ -9,7 +10,8 @@ def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_0
         channels: 声道数
         max_frames: 最大检查帧数，默认100,000
 
-    Returns:
+    Returns
+    -------
         int: 24（真24位）或16（实际16位或检测失败）
     """
     ffmpeg_cmd = [
@@ -34,14 +36,15 @@ def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_0
             print("无法打开子进程的标准输出")
             return 16
 
-        for frames_checked in range(max_frames):
+        for _frames_checked in range(max_frames):
             frame_data = stdout.read(frame_size)
             # print(''.join(format(byte, '08b') for byte in frame_data))
             if not frame_data or len(frame_data) < frame_size:
                 break
             if _check_frame_depth(frame_data):
                 return 24
-        return 16
+        else:
+            return 16
     except (subprocess.SubprocessError, OSError) as e:
         print(f"比特深度检测出错: {e}")
         return 16

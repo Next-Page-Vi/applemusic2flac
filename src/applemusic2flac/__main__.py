@@ -1,23 +1,26 @@
 # applemusic2flac/__main__.py
 """Main entry point for the applemusic2flac conversion tool."""
-import os
+import logging
 import shutil
 import sys
+from pathlib import Path
 
 from .audio import convert_to_flac
 from .framedepth import detect_true_bit_depth
 from .metadata import extract_tags_from_metadata, ffprobe_get_metadata, get_channels_and_samplerate
 from .utils import make_safe_filename
 
+logging.basicConfig(level = logging.INFO,format = "%(asctime)s - %(levelname)s - %(message)s")
 
 def main(source_dir: str, dest_dir: str) -> None:
-    m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir) 
-                 for f in files if f.lower().endswith(".m4a")]
+    source_dir = Path(source_dir)
+    m4a_files = list(source_dir.rglob("*.m4a"))
+    # m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir) 
+    #             for f in files if f.lower().endswith(".m4a")]
     if not m4a_files:
-        print("未找到任何 .m4a 文件，程序退出。")
+        logging.critical("未找到任何 .m4a 文件, 程序退出。")
         return
-    else :
-        print(f"找到 {len(m4a_files)} 个 .m4a 文件。")
+    logging.info("找到 %s 个 .m4a 文件。", len(m4a_files))
 
     sample_file = m4a_files[0]
     metadata = ffprobe_get_metadata(sample_file)
@@ -25,31 +28,33 @@ def main(source_dir: str, dest_dir: str) -> None:
     artist = tags["artist"] or "UnknownArtist"
     album = tags["album"] or "UnknownAlbum"
     date = tags["date"] or "UnknownDate"
-    target_dir = os.path.join(dest_dir, make_safe_filename(f"{artist} - {album} - ({date})"))
-    os.makedirs(target_dir, exist_ok=True)
+    target_dir = Path(dest_dir) / make_safe_filename(f"{artist} - {album} - ({date})")
+    Path.mkdir(target_dir, exist_ok=True)
 
     for file_path in m4a_files:
         meta = ffprobe_get_metadata(file_path)
         track_tags = extract_tags_from_metadata(meta)
         channels, _ = get_channels_and_samplerate(meta)
         true_depth = detect_true_bit_depth(file_path, channels)
-        track_title = track_tags["title"] or os.path.splitext(os.path.basename(file_path))[0]
+        track_title = track_tags.get("title") or Path(file_path).stem
         dst_filename = make_safe_filename(f"{track_tags["discnumber"]}.{track_tags["tracknumber"]}.{track_title}.flac")
-        dst_file_path = os.path.join(target_dir, dst_filename)
+        dst_file_path = Path(target_dir) / dst_filename
 
-        print(f"正在处理：{file_path}\n  -> 有效比特深度: {true_depth}, 输出文件: {dst_file_path}")
+        logging.info("正在处理: %s -> 有效比特深度: %s ,输出文件: %s ", file_path , true_depth , dst_file_path)
         convert_to_flac(file_path, dst_file_path, true_depth, track_tags)
 
-    cover_jpg_path = next((os.path.join(root, f) for root, _, files in os.walk(source_dir) 
-                           for f in files if f.lower() == "cover.jpg"), None)
-    if cover_jpg_path:
-        shutil.copy(cover_jpg_path, os.path.join(target_dir, "cover.jpg"))
-        print(f"已复制封面到 {target_dir}")
+    cover_path = next(
+        (f for f in Path(source_dir).rglob("*cover*") if f.suffix.lower() in {".jpg", ".jpeg", ".png"}),
+        None)
+    if cover_path:
+        cover_suffix = cover_path.suffix.lower()
+        shutil.copy(cover_path, Path(target_dir) / f"cover{cover_suffix}")
+        logging.info("已复制封面到 %s", target_dir)
     else:
-        print("未找到 cover.jpg，不进行复制。")
+        logging.info("未找到 cover.jpg, 不进行复制。")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("用法: python -m applemusic2flac <source_dir> <dest_dir>")
+        logging.info("用法: python -m applemusic2flac <source_dir> <dest_dir>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])

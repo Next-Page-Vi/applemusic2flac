@@ -1,15 +1,16 @@
 # applemusic2flac/metadata.py
-import subprocess
 import json
+import subprocess
 from json import JSONDecodeError
+
 
 def ffprobe_get_metadata(file_path: str) -> dict:
     cmd = [
-        "ffprobe", "-v", 
-        "quiet", 
-        "-print_format", "json", 
-        "-show_format", 
-        "-show_streams", 
+        "ffprobe", "-v",
+        "quiet",
+        "-print_format", "json",
+        "-show_format",
+        "-show_streams",
         file_path
     ]
     try:
@@ -46,7 +47,7 @@ def extract_tags_from_metadata(metadata: dict) -> dict:
 
     tags["tracknumber"] = parse_number(format_tags.get("track", format_tags.get("tracknumber", "")))[0]
     tags["discnumber"] = parse_number(format_tags.get("disc", format_tags.get("discnumber", "")))[0]
-    
+
     if parse_number(format_tags.get("totaldiscs", ""))[1] == -1:
         tags["totaldiscs"] = ""
     else:
