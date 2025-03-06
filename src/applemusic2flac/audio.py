@@ -1,9 +1,27 @@
 # applemusic2flac/audio.py
+"""
+Module for audio file conversion operations, specifically for converting audio files to FLAC format
+
+with specified bit depth and metadata tags using ffmpeg.
+"""
 import logging
 import subprocess
 
 
 def convert_to_flac(src_file: str, dst_file: str, bit_depth: int, track_tags:dict) -> None:
+    """
+    Convert audio file to FLAC format with specified bit depth and metadata tags.
+
+    Args:
+        src_file (str): Path to the source audio file
+        dst_file (str): Path where the output FLAC file will be saved
+        bit_depth (int): Bit depth for the output file (16 or 32)
+        track_tags (dict): Dictionary containing metadata tags to be added to the FLAC file
+
+    Returns
+    -------
+        None
+    """
     sample_fmt = "s16" if bit_depth == 16 else "s32"  # noqa: PLR2004
     cmd = [
         "ffmpeg",

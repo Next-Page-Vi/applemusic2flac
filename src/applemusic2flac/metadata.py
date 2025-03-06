@@ -1,4 +1,11 @@
 # applemusic2flac/metadata.py
+"""
+Metadata handling module for Apple Music to FLAC conversion.
+
+This module provides utilities for extracting and processing audio metadata
+using ffprobe, including functions to parse track numbers, extract tags,
+and retrieve audio format information like channels and sample rate.
+"""
 import json
 import logging
 import subprocess
@@ -6,6 +13,16 @@ from json import JSONDecodeError
 
 
 def ffprobe_get_metadata(file_path: str) -> dict:
+    """
+    Get metadata from a media file using ffprobe.
+
+    Args:
+        file_path: Path to the media file to analyze.
+
+    Returns
+    -------
+        A dictionary containing the file's metadata or an empty dict if an error occurs.
+    """
     cmd = [
         "ffprobe", "-v",
         "quiet",
@@ -25,6 +42,17 @@ def ffprobe_get_metadata(file_path: str) -> dict:
         return {}
 
 def parse_number(disc_str: str) -> list[int]:
+    """
+    Parse a string in the format "number/total" into component numbers.
+
+    Args:
+        disc_str: String containing number information (e.g., "1/5").
+
+    Returns
+    -------
+        A list containing [number, total]. If number is missing or invalid, defaults to 1.
+        If total is missing or invalid, defaults to -1.
+    """
     # 如果不是字符串或字符串为空, 返回默认值 [1, -1]
     if not isinstance(disc_str, str) or not disc_str.strip():
         return [1, -1]
@@ -42,6 +70,16 @@ def parse_number(disc_str: str) -> list[int]:
     return [num, total]
 
 def extract_tags_from_metadata(metadata: dict) -> dict:
+    """
+    Extract audio tags from ffprobe metadata output.
+
+    Args:
+        metadata: Dictionary containing metadata from ffprobe.
+
+    Returns
+    -------
+        A dictionary containing extracted audio tags.
+    """
     tags = {}
     fmt = metadata.get("format", {})
     format_tags = fmt.get("tags", {})
@@ -74,6 +112,17 @@ def extract_tags_from_metadata(metadata: dict) -> dict:
     return tags
 
 def get_channels_and_samplerate(metadata: dict) -> tuple[int, int]:
+    """
+    Extract channel count and sample rate from audio metadata.
+
+    Args:
+        metadata: Dictionary containing metadata from ffprobe.
+
+    Returns
+    -------
+        A tuple containing (channels, sample_rate).
+        Defaults to (2, 44100) if no audio stream is found.
+    """
     streams = metadata.get("streams", [])
     for stream in streams:
         if stream.get("codec_type") == "audio":

@@ -13,6 +13,16 @@ from .utils import make_safe_filename
 logging.basicConfig(level = logging.INFO,format = "%(asctime)s - %(levelname)s - %(message)s")
 
 def main(source_dir: str, dest_dir: str) -> None:
+    """Convert Apple Music m4a files to FLAC format.
+
+    Args:
+        source_dir (str): Directory containing m4a files to convert
+        dest_dir (str): Target directory for converted FLAC files
+
+    Returns
+    -------
+        None
+    """
     source_dir = Path(source_dir)
     m4a_files = list(source_dir.rglob("*.m4a"))
     # m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir)
@@ -20,6 +30,7 @@ def main(source_dir: str, dest_dir: str) -> None:
     if not m4a_files:
         logging.critical("未找到任何 .m4a 文件, 程序退出。")
         return
+
     logging.info("找到 %s 个 .m4a 文件。", len(m4a_files))
 
     sample_file = m4a_files[0]
@@ -29,6 +40,7 @@ def main(source_dir: str, dest_dir: str) -> None:
     album = tags["album"] or "UnknownAlbum"
     date = tags["date"] or "UnknownDate"
     target_dir = Path(dest_dir) / make_safe_filename(f"{artist} - {album} - ({date})")
+
     Path.mkdir(target_dir, exist_ok=True)
 
     for file_path in m4a_files:
@@ -40,7 +52,8 @@ def main(source_dir: str, dest_dir: str) -> None:
         dst_filename = make_safe_filename(f"{track_tags["discnumber"]}.{track_tags["tracknumber"]}.{track_title}.flac")
         dst_file_path = Path(target_dir) / dst_filename
 
-        logging.info("正在处理: %s -> 有效比特深度: %s ,输出文件: %s ", file_path , true_depth , dst_file_path)
+        logging.info("正在处理: %s -> 有效比特深度: %s ,输出文件: %s",
+                     Path(file_path).name , true_depth , dst_file_path)
         convert_to_flac(file_path, dst_file_path, true_depth, track_tags)
 
     cover_path = next(
@@ -54,7 +67,7 @@ def main(source_dir: str, dest_dir: str) -> None:
         logging.info("未找到 cover.jpg, 不进行复制。")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 3:  # noqa: PLR2004
         logging.info("用法: python -m applemusic2flac <source_dir> <dest_dir>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])

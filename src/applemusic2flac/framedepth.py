@@ -1,3 +1,9 @@
+# applemusic2flac/framedepth.py
+"""
+Module for detecting the true bit depth of audio files by analyzing raw audio data.
+
+This module provides functionality to determine if an audio file is truly 24-bit or effectively 16-bit.
+"""
 import logging
 import subprocess
 from typing import Optional
