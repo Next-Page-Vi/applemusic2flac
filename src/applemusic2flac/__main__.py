@@ -15,7 +15,7 @@ logging.basicConfig(level = logging.INFO,format = "%(asctime)s - %(levelname)s -
 def main(source_dir: str, dest_dir: str) -> None:
     source_dir = Path(source_dir)
     m4a_files = list(source_dir.rglob("*.m4a"))
-    # m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir) 
+    # m4a_files = [os.path.join(root, f) for root, _, files in os.walk(source_dir)
     #             for f in files if f.lower().endswith(".m4a")]
     if not m4a_files:
         logging.critical("未找到任何 .m4a 文件, 程序退出。")

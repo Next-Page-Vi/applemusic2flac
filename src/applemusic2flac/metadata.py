@@ -1,5 +1,6 @@
 # applemusic2flac/metadata.py
 import json
+import logging
 import subprocess
 from json import JSONDecodeError
 
@@ -16,15 +17,15 @@ def ffprobe_get_metadata(file_path: str) -> dict:
     try:
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, encoding='utf-8', errors='replace')
         if not result.stdout.strip():
-            print(f"[ffprobe] 无输出，可能文件无法读取或不是音频: {file_path}")
+            logging.error("[ffprobe] 无输出, 可能文件无法读取或不是音频: %s", file_path )
             return {}
         return json.loads(result.stdout)
-    except (subprocess.CalledProcessError, JSONDecodeError, Exception) as e:
-        print(f"[ffprobe] 错误: {e}")
+    except (subprocess.CalledProcessError, JSONDecodeError, Exception):
+        logging.exception("[ffprobe] 错误:")
         return {}
 
 def parse_number(disc_str: str) -> list[int]:
-    # 如果不是字符串或字符串为空，返回默认值 [1, -1]
+    # 如果不是字符串或字符串为空, 返回默认值 [1, -1]
     if not isinstance(disc_str, str) or not disc_str.strip():
         return [1, -1]
     # 分割字符串并移除首尾空白
@@ -32,10 +33,10 @@ def parse_number(disc_str: str) -> list[int]:
     # 默认值
     num = 1
     total = -1
-    # 如果有第一个部分且是数字，转换为整数
+    # 如果有第一个部分且是数字, 转换为整数
     if parts[0] and parts[0].isdigit():
         num = int(parts[0])
-    # 如果有第二个部分且是数字，转换为整数
+    # 如果有第二个部分且是数字, 转换为整数
     if len(parts) > 1 and parts[1] and parts[1].isdigit():
         total = int(parts[1])
     return [num, total]

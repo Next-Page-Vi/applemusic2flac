@@ -34,5 +34,5 @@ def convert_to_flac(src_file: str, dst_file: str, bit_depth: int, track_tags:dic
     ]
     try:
         subprocess.run(cmd, check=True, stderr=subprocess.PIPE, text=True, encoding="utf-8")
-    except subprocess.CalledProcessError as e:
-        logging.info("转码失败: %s 错误输出: %s ", e , e.stderr)
+    except subprocess.CalledProcessError:
+        logging.exception("转码失败: ")
