@@ -40,6 +40,7 @@ ignore = [
     "FIX",      # 允许 TODO 等需要 FIX 的注释
     "TD003",    # 允许 TODO 后面不跟着 url
     "TRY002",   # 允许创建普通的 Exception
+    "S603",   # 允许使用 subprocess
 ]
 pydocstyle = { convention = 'numpy' }
 

@@ -15,7 +15,7 @@ def ffprobe_get_metadata(file_path: str) -> dict:
         file_path
     ]
     try:
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, encoding='utf-8', errors='replace')
+        result = subprocess.run(cmd, capture_output=True, check=True, encoding="utf-8", errors="replace")
         if not result.stdout.strip():
             logging.error("[ffprobe] 无输出, 可能文件无法读取或不是音频: %s", file_path )
             return {}
