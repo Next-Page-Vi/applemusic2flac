@@ -20,5 +20,6 @@ def get_album_matadata_sample(m4a_files:list , sample_id:int = 0) -> str:
     return artist, album, date
 
 
-def get_album_foldername(album_tags:list) -> str:
+def get_album_matadata(album_tags:list) -> str:
     """Get full album information from a list of m4a files."""
+    values = set(tag.get(tag_name, '') for tag in tags_list if tag.get(tag_name))

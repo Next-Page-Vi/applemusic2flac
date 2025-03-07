@@ -12,14 +12,17 @@
 
 ## 使用步骤
 
-1. 需要安装 FFmpeg 并释放在环境变量中：
-
-2. 克隆此仓库：
+1. 需要安装 FFmpeg 并释放在环境变量中:
+2. 克隆此仓库:
    git clone https://github.com/Next-Page-Vi/applemusic2flac.git
-   
-## 饼
+3. 在applemusic2flac运行:
+   python -m src.applemusic2flac <source_dir> <dest_dir>
 
+   
+## TODO
+
+- [ ] 输出频谱图并自动上传到图床（你可以结合 propolis 实现）；
+- [ ] 允许用户输入applemusic链接通过yadc拿到部分元数据；
 - [ ] 自定义命名方式以符合其他拍脑门定下命名规则的站点；
 - [ ] 输出 Gazelle Json；
-- [ ] 输出频谱图并自动上传到图床（你可以结合 propolis 实现）；
 - [ ] 自动填写表单到 NexusPHP 架构的站点。
