@@ -9,7 +9,9 @@ import subprocess
 from typing import Optional
 
 
-def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_000) -> int:
+def detect_true_bit_depth(
+    file_path: str, channels: int, max_frames: int = 100_000
+) -> int:
     """检测音频文件的真实比特深度(16位或24位)。
 
     Args:
@@ -23,13 +25,17 @@ def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_0
     """
     ffmpeg_cmd = [
         "ffmpeg",
-        "-i", file_path,
+        "-i",
+        file_path,
         "-vn",
-        "-acodec", "pcm_s24le",
-        "-f", "s24le",
+        "-acodec",
+        "pcm_s24le",
+        "-f",
+        "s24le",
         "-hide_banner",
-        "-loglevel", "error",  # 减少不必要输出
-        "pipe:"
+        "-loglevel",
+        "error",  # 减少不必要输出
+        "pipe:",
     ]
     frame_size = channels * 3  # 每帧字节数: 声道数 * 3字节 (24位)
 
@@ -37,7 +43,9 @@ def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_0
     process: Optional[subprocess.Popen] = None
     try:
         # 使用 subprocess.PIPE 替代 pipe:1, 避免平台差异
-        process = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         stdout = process.stdout
         if stdout is None:
             logging.warning("无法打开子进程的标准输出, 使用默认比特深度 16")
@@ -53,12 +61,13 @@ def detect_true_bit_depth(file_path: str, channels: int, max_frames: int = 100_0
         else:
             return 16
     except (subprocess.SubprocessError, OSError) as e:
-        logging.warning("比特深度检测出错, 使用默认比特深度: %s", e )
+        logging.warning("比特深度检测出错, 使用默认比特深度: %s", e)
         return 16
     finally:
         if process and process.poll() is None:  # 仅在进程未结束时清理
             process.terminate()
             process.wait(timeout=1)  # 等待进程结束, 避免僵尸进程
+
 
 def _check_frame_depth(frame_data: bytes) -> bool:
     """检查单帧数据是否使用超过16位深度。"""

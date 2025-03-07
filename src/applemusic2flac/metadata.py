@@ -24,22 +24,27 @@ def ffprobe_get_metadata(file_path: str) -> dict:
         A dictionary containing the file's metadata or an empty dict if an error occurs.
     """
     cmd = [
-        "ffprobe", "-v",
+        "ffprobe",
+        "-v",
         "quiet",
-        "-print_format", "json",
+        "-print_format",
+        "json",
         "-show_format",
         "-show_streams",
-        file_path
+        file_path,
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, check=True, encoding="utf-8", errors="replace")
+        result = subprocess.run(
+            cmd, capture_output=True, check=True, encoding="utf-8", errors="replace"
+        )
         if not result.stdout.strip():
-            logging.error("[ffprobe] 无输出, 可能文件无法读取或不是音频: %s", file_path )
+            logging.error("[ffprobe] 无输出, 可能文件无法读取或不是音频: %s", file_path)
             return {}
         return json.loads(result.stdout)
     except (subprocess.CalledProcessError, JSONDecodeError, Exception):
         logging.exception("[ffprobe] 错误:")
         return {}
+
 
 def parse_number(disc_str: str) -> list[int]:
     """
@@ -69,6 +74,7 @@ def parse_number(disc_str: str) -> list[int]:
         total = int(parts[1])
     return [num, total]
 
+
 def extract_tags_from_metadata(metadata: dict) -> dict:
     """
     Extract audio tags from ffprobe metadata output.
@@ -84,8 +90,12 @@ def extract_tags_from_metadata(metadata: dict) -> dict:
     fmt = metadata.get("format", {})
     format_tags = fmt.get("tags", {})
 
-    tags["tracknumber"] = parse_number(format_tags.get("track", format_tags.get("tracknumber", "")))[0]
-    tags["discnumber"] = parse_number(format_tags.get("disc", format_tags.get("discnumber", "")))[0]
+    tags["tracknumber"] = parse_number(
+        format_tags.get("track", format_tags.get("tracknumber", ""))
+    )[0]
+    tags["discnumber"] = parse_number(
+        format_tags.get("disc", format_tags.get("discnumber", ""))
+    )[0]
 
     if parse_number(format_tags.get("totaldiscs", ""))[1] == -1:
         tags["totaldiscs"] = ""
@@ -111,6 +121,7 @@ def extract_tags_from_metadata(metadata: dict) -> dict:
 
     return tags
 
+
 def get_channels_and_samplerate(metadata: dict) -> tuple[int, int]:
     """
     Extract channel count and sample rate from audio metadata.
@@ -126,6 +137,7 @@ def get_channels_and_samplerate(metadata: dict) -> tuple[int, int]:
     streams = metadata.get("streams", [])
     for stream in streams:
         if stream.get("codec_type") == "audio":
-            return int(stream.get("channels", 2)), int(stream.get("sample_rate", "44100"))
+            return int(stream.get("channels", 2)), int(
+                stream.get("sample_rate", "44100")
+            )
     return 2, 44100
-
