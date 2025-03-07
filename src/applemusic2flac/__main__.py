@@ -6,6 +6,7 @@ import shutil
 import sys
 from pathlib import Path
 
+from .album import get_album_matadata_sample
 from .audio import convert_to_flac
 from .framedepth import detect_true_bit_depth
 from .metadata import (
@@ -38,21 +39,21 @@ def main(source_dir: str, dest_dir: str) -> None:
         return
 
     logging.info("找到 %s 个 .m4a 文件。", len(m4a_files))
-
-    sample_file = m4a_files[0]
-    metadata = ffprobe_get_metadata(sample_file)
-    tags = extract_tags_from_metadata(metadata)
-    artist = tags["artist"] or "UnknownArtist"
-    album = tags["album"] or "UnknownAlbum"
-    date = tags["date"] or "UnknownDate"
-    target_dir = Path(dest_dir) / make_safe_filename(f"{artist} - {album} - ({date})")
+    matadata_sample = get_album_matadata_sample(m4a_files, 0)
+    foldername_sample = make_safe_filename(
+        f"{matadata_sample.artist} - {matadata_sample.album} - ({matadata_sample.date})"
+    )
+    target_dir = Path(dest_dir) / foldername_sample
+    album_tags = []
 
     Path.mkdir(target_dir, exist_ok=True)
 
     for file_path in m4a_files:
-        meta = ffprobe_get_metadata(file_path)
-        track_tags = extract_tags_from_metadata(meta)
-        channels, _ = get_channels_and_samplerate(meta)
+        cover = False
+        metadata = ffprobe_get_metadata(file_path)
+        track_tags = extract_tags_from_metadata(metadata)
+        album_tags.append(track_tags)
+        channels, _ = get_channels_and_samplerate(metadata)
         true_depth = detect_true_bit_depth(file_path, channels)
         track_title = track_tags.get("title") or Path(file_path).stem
         dst_filename = make_safe_filename(
@@ -80,12 +81,15 @@ def main(source_dir: str, dest_dir: str) -> None:
         cover_suffix = cover_path.suffix.lower()
         shutil.copy(cover_path, Path(target_dir) / f"cover{cover_suffix}")
         logging.info("已复制封面到 %s", target_dir)
-    else:
-        logging.info("未找到 cover.jpg, 不进行复制。")
+        cover = True
+    if not cover:
+        logging.info("未找到封面, 请手动复制。")
+    for tracks in album_tags:
+        logging.info(tracks.get("title"))
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:  # noqa: PLR2004
-        logging.info("用法: python -m applemusic2flac <source_dir> <dest_dir>")
+        logging.info("用法: python -m src.applemusic2flac <source_dir> <dest_dir>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])

@@ -10,7 +10,7 @@ from typing import Optional
 
 
 def detect_true_bit_depth(
-    file_path: str, channels: int, max_frames: int = 100_000
+    file_path: str, channels: int, max_frames: int = 100_000, frame_step: int = 1
 ) -> int:
     """检测音频文件的真实比特深度(16位或24位)。
 
@@ -51,7 +51,7 @@ def detect_true_bit_depth(
             logging.warning("无法打开子进程的标准输出, 使用默认比特深度 16")
             return 16
 
-        for _frames_checked in range(max_frames):
+        for _frames_checked in range(0, max_frames, frame_step):
             frame_data = stdout.read(frame_size)
             # print(''.join(format(byte, '08b') for byte in frame_data))
             if not frame_data or len(frame_data) < frame_size:
