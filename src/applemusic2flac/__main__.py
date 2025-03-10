@@ -52,7 +52,7 @@ def main(source_dir: str, dest_dir: str) -> None:
         track_metadata = get_track_metadata(file_path)
         track_metadata_set.append(track_metadata) # 收集整张专辑的音轨信息用于判断专辑信息
         # channels, _ = get_channels_and_samplerate(metadata)
-        true_depth = detect_true_bit_depth(file_path, track_metadata.channels) # 获取真实比特深度
+        # true_depth = detect_true_bit_depth(file_path, track_metadata.channels) # 获取真实比特深度
         track_title = track_metadata.title or Path(file_path).stem # 获取音轨标题
 
         dst_filename = make_safe_filename(
@@ -63,10 +63,10 @@ def main(source_dir: str, dest_dir: str) -> None:
         logging.info(
             "正在处理: %s -> 有效比特深度: %s ,输出文件: %s",
             Path(file_path).name,
-            true_depth,
+            track_metadata.bit_depth,
             dst_file_path,
         )
-        convert_to_flac(file_path, dst_file_path, true_depth, track_metadata)
+        convert_to_flac(file_path, dst_file_path, track_metadata.bit_depth, track_metadata)
 
     # 封面处理
     cover_path = next(
