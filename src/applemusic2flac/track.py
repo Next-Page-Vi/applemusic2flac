@@ -13,31 +13,33 @@ from dataclasses import dataclass
 from json import JSONDecodeError
 from typing import Optional
 
-from utils import parse_number
+from .framedepth import detect_true_bit_depth
+from .utils import parse_number
 
 
 @dataclass
 class TrackMetadata:
     """Class representing audio track metadata."""
 
-    tracknumber: Optional[int] = None  # Track number
-    discnumber: Optional[int] = None  # Disc number
-    totaltracks: Optional[int] = None  # Total number of tracks
-    totaldiscs: Optional[int] = None  # Total number of discs
-    artist: Optional[str] = None  # Track artist
-    title: Optional[str] = None  # Track title
-    album: Optional[str] = None  # Album name
-    performer: Optional[str] = None  # Performer
-    copyright: Optional[str] = None  # Copyright information
-    date: Optional[int] = None  # Release date
-    isrc: Optional[str] = None  # International Standard Recording Code
-    upc: Optional[str] = None  # Universal Product Code
-    label: Optional[str] = None  # Record label
-    albumartist: Optional[str] = None  # Album artist
-    composer: Optional[str] = None  # Composer
-    genre: Optional[str] = None  # Genre
-    sample_rate: Optional[int] = None  # Sample rate (Hz)
-    bit_depth: Optional[int] = None  # Bit depth
+    tracknumber: Optional[str] = ""  # Track number
+    discnumber: Optional[str] = ""  # Disc number
+    totaltracks: Optional[str] = ""  # Total number of tracks
+    totaldiscs: Optional[str] = ""  # Total number of discs
+    artist: Optional[str] = ""  # Track artist
+    title: Optional[str] = ""  # Track title
+    album: Optional[str] = ""  # Album name
+    performer: Optional[str] = ""  # Performer
+    copyright: Optional[str] = ""  # Copyright information
+    date: Optional[str] = ""  # Release date
+    isrc: Optional[str] = ""  # International Standard Recording Code
+    upc: Optional[str] = ""  # Universal Product Code
+    label: Optional[str] = ""  # Record label
+    albumartist: Optional[str] = ""  # Album artist
+    composer: Optional[str] = ""  # Composer
+    genre: Optional[str] = ""  # Genre
+    sample_rate: Optional[str] = ""  # Sample rate (Hz)
+    bit_depth: Optional[str] = ""  # Bit depth
+    channels: Optional[str] = ""  # Number of audio channels
 
 def ffprobe_get_metadata(file_path: str) -> dict:
     """
@@ -73,10 +75,7 @@ def ffprobe_get_metadata(file_path: str) -> dict:
         return {}
 
 
-
-
-
-def extract_tags_from_metadata(metadata: dict) -> dict:
+def get_track_metadata(file_path: str) -> TrackMetadata:
     """
     Extract audio tags from ffprobe metadata output.
 
@@ -87,58 +86,47 @@ def extract_tags_from_metadata(metadata: dict) -> dict:
     -------
         A dictionary containing extracted audio tags.
     """
-    tags = {}
-    fmt = metadata.get("format", {})
-    format_tags = fmt.get("tags", {})
+    track_metadata_dict = ffprobe_get_metadata(file_path)
+    track_metadata = TrackMetadata()
+    format_dict = track_metadata_dict.get("format", {})
+    format_tags = format_dict.get("tags", {})
 
-    tags["tracknumber"] = parse_number(
+
+    track_metadata.tracknumber = parse_number(
         format_tags.get("track", format_tags.get("tracknumber", ""))
     )[0]
-    tags["discnumber"] = parse_number(
+    track_metadata.discnumber = parse_number(
         format_tags.get("disc", format_tags.get("discnumber", ""))
     )[0]
 
-    if parse_number(format_tags.get("totaldiscs", ""))[1] == -1:
-        tags["totaldiscs"] = ""
-    else:
-        tags["totaldiscs"] = parse_number(format_tags.get("totaldiscs", ""))[1]
     if parse_number(format_tags.get("totaltracks", ""))[1] == -1:
-        tags["totaltracks"] = ""
+        track_metadata.totaltracks = ""
     else:
-        tags["totaltracks"] = parse_number(format_tags.get("totaltracks", ""))[1]
-    tags["artist"] = format_tags.get("artist", "")
-    tags["title"] = format_tags.get("title", "")
-    tags["album"] = format_tags.get("album", "")
+        track_metadata.totaltracks = parse_number(format_tags.get("totaltracks", ""))[1]
 
-    tags["performer"] = format_tags.get("performer", "")
-    tags["copyright"] = format_tags.get("copyright", "")
-    tags["date"] = format_tags.get("date", "")
-    tags["isrc"] = format_tags.get("isrc", "")
-    tags["upc"] = format_tags.get("upc", "")
-    tags["label"] = format_tags.get("label", "")
-    tags["albumartist"] = format_tags.get("albumartist", "")
-    tags["composer"] = format_tags.get("composer", "")
-    tags["genre"] = format_tags.get("genre", "")
+    if parse_number(format_tags.get("totaldiscs", ""))[1] == -1:
+        track_metadata.totaldiscs = ""
+    else:
+        track_metadata.totaldiscs = parse_number(format_tags.get("totaldiscs", ""))[1]
 
-    return tags
+    track_metadata.artist = format_tags.get("artist", "")
+    track_metadata.title = format_tags.get("title", "")
+    track_metadata.album = format_tags.get("album", "")
 
+    track_metadata.performer = format_tags.get("performer", "")
+    track_metadata.copyright = format_tags.get("copyright", "")
+    track_metadata.date = format_tags.get("date", "")
+    track_metadata.isrc = format_tags.get("isrc", "")
+    track_metadata.upc = format_tags.get("upc", "")
+    track_metadata.label = format_tags.get("label", "")
+    track_metadata.albumartist = format_tags.get("albumartist", "")
+    track_metadata.composer = format_tags.get("composer", "")
+    track_metadata.genre = format_tags.get("genre", "")
 
-def get_channels_and_samplerate(metadata: dict) -> tuple[int, int]:
-    """
-    Extract channel count and sample rate from audio metadata.
-
-    Args:
-        metadata: Dictionary containing metadata from ffprobe.
-
-    Returns
-    -------
-        A tuple containing (channels, sample_rate).
-        Defaults to (2, 44100) if no audio stream is found.
-    """
-    streams = metadata.get("streams", [])
+    streams = track_metadata_dict.get("streams", [])
     for stream in streams:
         if stream.get("codec_type") == "audio":
-            return int(stream.get("channels", 2)), int(
-                stream.get("sample_rate", "44100")
-            )
-    return 2, 44100
+            track_metadata.channels = stream.get("channels", "")
+    # 判断真实比特深度
+    track_metadata.bit_depth = detect_true_bit_depth(file_path, track_metadata.channels)
+    return track_metadata

@@ -25,8 +25,7 @@ def detect_true_bit_depth(
     """
     ffmpeg_cmd = [
         "ffmpeg",
-        "-i",
-        file_path,
+        "-i",file_path,
         "-vn",
         "-acodec",
         "pcm_s24le",
@@ -39,7 +38,6 @@ def detect_true_bit_depth(
     ]
     frame_size = channels * 3  # 每帧字节数: 声道数 * 3字节 (24位)
 
-    """分析音频数据的比特深度。"""
     process: Optional[subprocess.Popen] = None
     try:
         # 使用 subprocess.PIPE 替代 pipe:1, 避免平台差异

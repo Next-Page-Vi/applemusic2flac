@@ -9,7 +9,7 @@ import subprocess
 
 
 def convert_to_flac(
-    src_file: str, dst_file: str, bit_depth: int, track_tags: dict
+    src_file: str, dst_file: str, bit_depth: int, track_metadata: dict
 ) -> None:
     """
     Convert audio file to FLAC format with specified bit depth and metadata tags.
@@ -31,22 +31,22 @@ def convert_to_flac(
         "-i",src_file,
         "-vn",
         "-map_metadata","-1",
-        "-metadata",f"title={track_tags['title']}",
-        "-metadata",f"album={track_tags['album']}",
-        "-metadata",f"tracknumber={track_tags['tracknumber']}",
-        "-metadata",f"discnumber={track_tags['discnumber']}",
-        "-metadata",f"artist={track_tags['artist']}",
-        "-metadata",f"performer={track_tags['performer']}",
-        "-metadata",f"copyright={track_tags['copyright']}",
-        "-metadata",f"date={track_tags['date']}",
-        "-metadata",f"isrc={track_tags['isrc']}",
-        "-metadata",f"upc={track_tags['upc']}",
-        "-metadata",f"label={track_tags['label']}",
-        "-metadata",f"albumartist={track_tags['albumartist']}",
-        "-metadata",f"composer={track_tags['composer']}",
-        "-metadata",f"totaldiscs={track_tags['totaldiscs']}",
-        "-metadata",f"totaltracks={track_tags['totaltracks']}",
-        "-metadata",f"genre={track_tags['genre']}",
+        "-metadata",f"title={track_metadata.title}",
+        "-metadata",f"album={track_metadata.album}",
+        "-metadata",f"tracknumber={track_metadata.tracknumber}",
+        "-metadata",f"discnumber={track_metadata.discnumber}",
+        "-metadata",f"artist={track_metadata.artist}",
+        "-metadata",f"performer={track_metadata.performer}",
+        "-metadata",f"copyright={track_metadata.copyright}",
+        "-metadata",f"date={track_metadata.date}",
+        "-metadata",f"isrc={track_metadata.isrc}",
+        "-metadata",f"upc={track_metadata.upc}",
+        "-metadata",f"label={track_metadata.label}",
+        "-metadata",f"albumartist={track_metadata.albumartist}",
+        "-metadata",f"composer={track_metadata.composer}",
+        "-metadata",f"totaldiscs={track_metadata.totaldiscs}",
+        "-metadata",f"totaltracks={track_metadata.totaltracks}",
+        "-metadata",f"genre={None}",
         "-c:a","flac",
         "-compression_level","5",
         "-sample_fmt",sample_fmt,

@@ -56,4 +56,3 @@ strict = true
 disallow_untyped_defs = true
 check_untyped_defs = true
 plugins = "pydantic.mypy"
-exclude = ["^deps/*", "^workdir/*", "^docker-workdir/*"]

@@ -6,14 +6,10 @@ import shutil
 import sys
 from pathlib import Path
 
-from .album import get_album_matadata_sample
+from .album import get_album_metadata, get_album_metadata_sample
 from .audio import convert_to_flac
 from .framedepth import detect_true_bit_depth
-from .metadata import (
-    extract_tags_from_metadata,
-    ffprobe_get_metadata,
-    get_channels_and_samplerate,
-)
+from .track import get_track_metadata
 from .utils import make_safe_filename
 
 logging.basicConfig(
@@ -39,25 +35,28 @@ def main(source_dir: str, dest_dir: str) -> None:
         return
 
     logging.info("找到 %s 个 .m4a 文件。", len(m4a_files))
-    matadata_sample = get_album_matadata_sample(m4a_files, 0)
+    album_metadata_sample = get_album_metadata_sample(m4a_files, 0)
     foldername_sample = make_safe_filename(
-        f"{matadata_sample.artist} - {matadata_sample.album} - ({matadata_sample.date})"
+        f"{album_metadata_sample.albumartist} - {album_metadata_sample.album} - ({album_metadata_sample.date})"
     )
     target_dir = Path(dest_dir) / foldername_sample
-    album_tags = []
+    track_metadata_set = []
 
     Path.mkdir(target_dir, exist_ok=True)
 
-    for file_path in m4a_files:
+    # 逐个处理音轨
+    for file_path in m4a_files: 
         cover = False
-        metadata = ffprobe_get_metadata(file_path)
-        track_tags = extract_tags_from_metadata(metadata)
-        album_tags.append(track_tags)
-        channels, _ = get_channels_and_samplerate(metadata)
-        true_depth = detect_true_bit_depth(file_path, channels)
-        track_title = track_tags.get("title") or Path(file_path).stem
+        # metadata = ffprobe_get_metadata(file_path)
+        # track_tags = extract_tags_from_metadata(metadata)
+        track_metadata = get_track_metadata(file_path)
+        track_metadata_set.append(track_metadata) # 收集整张专辑的音轨信息用于判断专辑信息
+        # channels, _ = get_channels_and_samplerate(metadata)
+        true_depth = detect_true_bit_depth(file_path, track_metadata.channels) # 获取真实比特深度
+        track_title = track_metadata.title or Path(file_path).stem # 获取音轨标题
+
         dst_filename = make_safe_filename(
-            f"{track_tags['discnumber']}.{track_tags['tracknumber']}.{track_title}.flac"
+            f"{track_metadata.discnumber}.{track_metadata.tracknumber}.{track_title}.flac"
         )
         dst_file_path = Path(target_dir) / dst_filename
 
@@ -67,8 +66,9 @@ def main(source_dir: str, dest_dir: str) -> None:
             true_depth,
             dst_file_path,
         )
-        convert_to_flac(file_path, dst_file_path, true_depth, track_tags)
+        convert_to_flac(file_path, dst_file_path, true_depth, track_metadata)
 
+    # 封面处理
     cover_path = next(
         (
             f
@@ -84,8 +84,7 @@ def main(source_dir: str, dest_dir: str) -> None:
         cover = True
     if not cover:
         logging.info("未找到封面, 请手动复制。")
-    for tracks in album_tags:
-        logging.info(tracks.get("title"))
+    album_metadata = get_album_metadata(track_metadata_set)
 
 
 if __name__ == "__main__":
