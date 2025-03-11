@@ -127,6 +127,9 @@ def get_track_metadata(file_path: str) -> TrackMetadata:
     for stream in streams:
         if stream.get("codec_type") == "audio":
             track_metadata.channels = stream.get("channels", "")
+            track_metadata.sample_rate = stream.get("sample_rate", "")
+            print(track_metadata.sample_rate)
+            break
     # 判断真实比特深度
     track_metadata.bit_depth = detect_true_bit_depth(file_path, track_metadata.channels)
     return track_metadata

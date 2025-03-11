@@ -46,13 +46,13 @@ def get_album_metadata(track_metadata_set: list) -> AlbumMetadata:
     album_values = Counter(
         [tag.album for tag in track_metadata_set if tag.album]
     )
-    album_metadata.album = sorted(album_values.items(), key=lambda x: -x[1])
-
+    album_metadata.album = sorted(album_values.items(), key=lambda x: -x[1])[0][0] if album_values else None
     # albumartist
     albumartist_values = Counter(
         [tag.albumartist for tag in track_metadata_set if tag.albumartist]
     )
     albumartist = sorted(albumartist_values.items(), key=lambda x: -x[1])
+
     artist_values = Counter(
         [tag.artist for tag in track_metadata_set if tag.artist]
     )
@@ -74,15 +74,33 @@ def get_album_metadata(track_metadata_set: list) -> AlbumMetadata:
             "Using Various Artists as albumartist."
         )
         album_metadata.albumartist = "Various Artists"
+
     # year
     date_values = Counter(
         [tag.date for tag in track_metadata_set if tag.date]
     )
-    date = sorted(date_values.items(), key=lambda x: -x[1])
-    album_metadata.date = date[0][0] if date else None
+    album_metadata.date = sorted(date_values.items(), key=lambda x: -x[1])[0][0] if date_values else None
     if album_metadata.date:
         try:
             year = parser.parse(album_metadata.date).year
         except ValueError:
-            year = "UnknownYear"
+            year = None
         album_metadata.year = year
+
+    #bit_depth
+    bit_depth_values = Counter(
+        [tag.bit_depth for tag in track_metadata_set if tag.bit_depth])
+    if len(bit_depth_values) > 1:
+        logging.warning("Multiple bit depths found, using the most common bit depth. "
+        "This is probably NOT compliant! Please check manually!")
+    album_metadata.bit_depth = sorted(bit_depth_values.items(), key=lambda x: -x[1])[0][0] if bit_depth_values else None
+
+    #sample_rate
+    sample_rate_values = Counter(
+        [tag.sample_rate for tag in track_metadata_set if tag.sample_rate])
+    if len(sample_rate_values) > 1:
+        logging.warning("Multiple sample rates found, using the most common sample rate. "
+        "This is probably NOT compliant! Please check manually!")
+    album_metadata.sample_rate = sorted(sample_rate_values.items(), key=lambda x: -x[1])[0][0] if sample_rate_values else None  # noqa: E501
+
+    return album_metadata

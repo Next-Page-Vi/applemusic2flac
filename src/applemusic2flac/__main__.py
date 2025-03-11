@@ -8,7 +8,6 @@ from pathlib import Path
 
 from .album import get_album_metadata, get_album_metadata_sample
 from .audio import convert_to_flac
-from .framedepth import detect_true_bit_depth
 from .track import get_track_metadata
 from .utils import make_safe_filename
 
@@ -45,7 +44,7 @@ def main(source_dir: str, dest_dir: str) -> None:
     Path.mkdir(target_dir, exist_ok=True)
 
     # 逐个处理音轨
-    for file_path in m4a_files: 
+    for file_path in m4a_files:
         cover = False
         # metadata = ffprobe_get_metadata(file_path)
         # track_tags = extract_tags_from_metadata(metadata)
@@ -85,6 +84,12 @@ def main(source_dir: str, dest_dir: str) -> None:
     if not cover:
         logging.info("未找到封面, 请手动复制。")
     album_metadata = get_album_metadata(track_metadata_set)
+    album_metadata.sample_rate = int(album_metadata.sample_rate) / 1000
+    new_dst_filename = make_safe_filename(
+            f"{album_metadata.albumartist} - {album_metadata.album} ({album_metadata.year}) - WEB - FLAC - {album_metadata.bit_depth}bit - {album_metadata.sample_rate}kHz"  # noqa: E501
+        )
+    logging.info("重命名专辑文件夹 -> %s", new_dst_filename)
+    target_dir.rename(Path(dest_dir) / new_dst_filename)
 
 
 if __name__ == "__main__":
