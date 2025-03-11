@@ -89,8 +89,10 @@ def main(source_dir: str, dest_dir: str) -> None:
             f"{album_metadata.albumartist} - {album_metadata.album} ({album_metadata.year}) - WEB - FLAC - {album_metadata.bit_depth}bit - {album_metadata.sample_rate}kHz"  # noqa: E501
         )
     logging.info("重命名专辑文件夹 -> %s", new_dst_filename)
-    target_dir.rename(Path(dest_dir) / new_dst_filename)
-
+    try:
+        target_dir.rename(Path(dest_dir) / new_dst_filename)
+    except FileExistsError:
+        logging.exception("文件夹已存在, 重命名失败。")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:  # noqa: PLR2004
