@@ -1,6 +1,6 @@
 # AppleMusic2FLAC
 
-一个专门用于转换 zhaarey/apple-music-downloader 下载的 ALAC 音频文件转换为 FLAC 格式的工具，主要服务于 DIC(OPS，没有 RED 所以不确定) 的发种要求。
+一个专门用于转换 [zhaarey/apple-music-downloader]([https://](https://github.com/zhaarey/apple-music-downloader)) 下载的 ALAC 音频文件转换为 FLAC 格式的工具，主要服务于音乐pt站的发种要求。
 
 ## 功能特点
 
@@ -14,9 +14,11 @@
 
 1. 需要安装 FFmpeg 并释放在环境变量中:
 2. 克隆此仓库:
-   git clone https://github.com/Next-Page-Vi/applemusic2flac.git
-3. 在applemusic2flac运行:
-   python -m src.applemusic2flac <source_dir> <dest_dir>
+   ```git clone https://github.com/Next-Page-Vi/applemusic2flac.git```
+3. 安装依赖
+   ```pip install -r requirements.txt```
+5. 在applemusic2flac运行:
+   ```python -m src.applemusic2flac <source_dir> <dest_dir>```
 
    
 ## TODO
