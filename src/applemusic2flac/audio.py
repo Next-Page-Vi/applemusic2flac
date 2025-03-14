@@ -7,10 +7,10 @@ with specified bit depth and metadata tags using ffmpeg.
 import logging
 import subprocess
 
+from .dataclass import TrackMetadata
 
-def convert_to_flac(
-    src_file: str, dst_file: str, bit_depth: int, track_metadata: dict
-) -> None:
+
+def convert_to_flac(src_file: str, dst_file: str, bit_depth: int, track_metadata: TrackMetadata) -> None:
     """
     Convert audio file to FLAC format with specified bit depth and metadata tags.
 
@@ -24,7 +24,7 @@ def convert_to_flac(
     -------
         None
     """
-    sample_fmt = "s16" if bit_depth == 16 else "s32"  # noqa: PLR2004
+    sample_fmt = "s16" if bit_depth == 16 else "s32"
     cmd = [
         "ffmpeg",
         "-y",

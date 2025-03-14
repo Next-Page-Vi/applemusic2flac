@@ -2,26 +2,12 @@
 """album level operations."""
 import logging
 from collections import Counter
-from dataclasses import dataclass
-from typing import Optional
 
 from dateutil import parser
 
+from .dataclass import AlbumMetadata
 from .track import get_track_metadata
 
-
-@dataclass
-class AlbumMetadata:
-    """Album Metadata Class"""
-
-    album: Optional[str] = None # 专辑名
-    albumartist: Optional[str] = None # 专辑艺术家
-    date: Optional[str] = None # 日期
-    year: Optional[int] = None # 年份
-    format: Optional[str] = "FLAC" # 音频格式
-    source: Optional[str] = "WEB" # 来源
-    sample_rate: Optional[int] = 0 # 采样率 (如 "44100")
-    bit_depth: Optional[int] = 0 # 比特深度 (如 "16")
 
 def get_album_metadata_sample(m4a_files: list, sample_id: int = 0) -> AlbumMetadata:
     """Get album information from a list of m4a files."""

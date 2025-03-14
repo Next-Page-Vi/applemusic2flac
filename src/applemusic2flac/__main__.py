@@ -5,16 +5,20 @@ import logging
 import shutil
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .album import get_album_metadata, get_album_metadata_sample
-from .audio import convert_to_flac
+from .ffmpeg_tools import ffmpeg_convert_flac
 from .track import get_track_metadata
-from .utils import make_safe_filename
+from .utils import get_unique_foldername, make_safe_filename
+
+if TYPE_CHECKING:
+    from .dataclass import TrackMetadata
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
+logging = logging.getLogger(__name__)
 
 def main(source_dir: str, dest_dir: str) -> None:
     """Convert Apple Music m4a files to FLAC format.
@@ -48,7 +52,7 @@ def main(source_dir: str, dest_dir: str) -> None:
         cover = False
         # metadata = ffprobe_get_metadata(file_path)
         # track_tags = extract_tags_from_metadata(metadata)
-        track_metadata = get_track_metadata(file_path)
+        track_metadata: TrackMetadata = get_track_metadata(file_path)
         track_metadata_set.append(track_metadata) # 收集整张专辑的音轨信息用于判断专辑信息
         # channels, _ = get_channels_and_samplerate(metadata)
         # true_depth = detect_true_bit_depth(file_path, track_metadata.channels) # 获取真实比特深度
@@ -61,11 +65,11 @@ def main(source_dir: str, dest_dir: str) -> None:
 
         logging.info(
             "正在处理: %s -> 有效比特深度: %s ,输出文件: %s",
-            Path(file_path).name,
+            dst_filename,
             track_metadata.bit_depth,
             dst_file_path,
         )
-        convert_to_flac(file_path, dst_file_path, track_metadata.bit_depth, track_metadata)
+        ffmpeg_convert_flac(file_path, dst_file_path, track_metadata)
 
     # 封面处理
     cover_path = next(
@@ -92,7 +96,12 @@ def main(source_dir: str, dest_dir: str) -> None:
     try:
         target_dir.rename(Path(dest_dir) / new_dst_filename)
     except FileExistsError:
-        logging.exception("文件夹已存在, 重命名失败。")
+        unique_name = get_unique_foldername(Path(dest_dir), new_dst_filename)
+        logging.warning("文件夹 %s 已存在，将使用替代名称: %s", new_dst_filename, unique_name)
+        try:
+            target_dir.rename(Path(dest_dir) / unique_name)
+        except Exception as e:
+            logging.exception("重命名文件夹失败: %s", e)
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:  # noqa: PLR2004
