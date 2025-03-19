@@ -1,3 +1,2 @@
 folder_name = "{album_metadata.albumartist} - {album_metadata.album} ({album_metadata.year}) - WEB - FLAC - {album_metadata.bit_depth}bit - {album_metadata.sample_rate}kHz"
 track_name = "{track_metadata.discnumber}.{track_metadata.tracknumber}.{track_metadata.title}.flac"
-output_folder = "C:\\Users\\nextpage\\Desktop\\output"
