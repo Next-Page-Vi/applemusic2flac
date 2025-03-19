@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .album import get_album_metadata, get_album_metadata_sample
+from .config import load_config
 from .ffmpeg_tools import ffmpeg_convert_flac
 from .track import get_track_metadata
 from .utils import get_unique_foldername, make_safe_filename
@@ -20,7 +21,7 @@ logging.basicConfig(
 )
 logging = logging.getLogger(__name__)
 
-def main(source_dir: str, dest_dir: str) -> None:
+def main(dest_dir: str,source_dir: str) -> None:
     """Convert Apple Music m4a files to FLAC format.
 
     Args:
@@ -32,6 +33,8 @@ def main(source_dir: str, dest_dir: str) -> None:
         None
     """
     source_dir = Path(source_dir)
+    config = load_config()
+    print(config.folder_name)
     m4a_files = list(source_dir.rglob("*.m4a"))
     if not m4a_files:
         logging.critical("未找到任何 .m4a 文件, 程序退出。")
@@ -50,17 +53,11 @@ def main(source_dir: str, dest_dir: str) -> None:
     # 逐个处理音轨
     for file_path in m4a_files:
         cover = False
-        # metadata = ffprobe_get_metadata(file_path)
-        # track_tags = extract_tags_from_metadata(metadata)
         track_metadata: TrackMetadata = get_track_metadata(file_path)
         track_metadata_set.append(track_metadata) # 收集整张专辑的音轨信息用于判断专辑信息
-        # channels, _ = get_channels_and_samplerate(metadata)
-        # true_depth = detect_true_bit_depth(file_path, track_metadata.channels) # 获取真实比特深度
-        track_title = track_metadata.title or Path(file_path).stem # 获取音轨标题
-
-        dst_filename = make_safe_filename(
-            f"{track_metadata.discnumber}.{track_metadata.tracknumber}.{track_title}.flac"
-        )
+        # track_title = track_metadata.title or Path(file_path).stem # 获取音轨标题, 避免元数据中无音轨标题
+        # 从配置文件读取目标音轨名命名格式
+        dst_filename = make_safe_filename(config.track_name.format(track_metadata=track_metadata))
         dst_file_path = Path(target_dir) / dst_filename
 
         logging.info(
@@ -89,9 +86,11 @@ def main(source_dir: str, dest_dir: str) -> None:
         logging.info("未找到封面, 请手动复制。")
     album_metadata = get_album_metadata(track_metadata_set)
     album_metadata.sample_rate = int(album_metadata.sample_rate) / 1000
-    new_dst_filename = make_safe_filename(
-            f"{album_metadata.albumartist} - {album_metadata.album} ({album_metadata.year}) - WEB - FLAC - {album_metadata.bit_depth}bit - {album_metadata.sample_rate}kHz"  # noqa: E501
-        )
+
+    # 从配置文件读取目标文件夹命名格式
+    new_dst_filename = make_safe_filename(config.folder_name.format(album_metadata=album_metadata))
+
+
     logging.info("重命名专辑文件夹 -> %s", new_dst_filename)
     try:
         target_dir.rename(Path(dest_dir) / new_dst_filename)
@@ -105,6 +104,6 @@ def main(source_dir: str, dest_dir: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:  # noqa: PLR2004
-        logging.info("用法: python -m src.applemusic2flac <source_dir> <dest_dir>")
+        logging.info("用法: python -m src.applemusic2flac <dest_dir> <source_dir>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])
