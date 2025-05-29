@@ -34,7 +34,7 @@ def main(dest_dir: str,source_dir: str) -> None:
     """
     source_dir = Path(source_dir)
     config = load_config()
-    print(config.folder_name)
+    # print(config.folder_name)
     m4a_files = list(source_dir.rglob("*.m4a"))
     if not m4a_files:
         logging.critical("未找到任何 .m4a 文件, 程序退出。")
@@ -96,7 +96,7 @@ def main(dest_dir: str,source_dir: str) -> None:
         target_dir.rename(Path(dest_dir) / new_dst_filename)
     except FileExistsError:
         unique_name = get_unique_foldername(Path(dest_dir), new_dst_filename)
-        logging.warning("文件夹 %s 已存在，将使用替代名称: %s", new_dst_filename, unique_name)
+        logging.warning("文件夹 %s 已存在, 将使用替代名称: %s", new_dst_filename, unique_name)
         try:
             target_dir.rename(Path(dest_dir) / unique_name)
         except Exception as e:

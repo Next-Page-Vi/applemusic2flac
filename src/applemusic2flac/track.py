@@ -31,9 +31,16 @@ def get_track_metadata(file_path: str) -> TrackMetadata:
 
     track_metadata.tracknumber = parse_number(format_tags.get("track", format_tags.get("tracknumber", "")))[0]
     track_metadata.discnumber = parse_number(format_tags.get("disc", format_tags.get("discnumber", "")))[0]
-
-    track_metadata.totaltracks = parse_number(format_tags.get("totaltracks", ""))[1]
-    track_metadata.totaldiscs = parse_number(format_tags.get("totaldiscs", ""))[1]
+    if format_tags.get("totaltracks"):
+        track_metadata.totaltracks = format_tags.get("totaltracks")
+    else:
+        # 如果没有 totaltracks 字段, 尝试从 tracknumber 中提取
+        track_metadata.totaltracks = parse_number(format_tags.get("track", format_tags.get("tracknumber", "")))[1]
+    if format_tags.get("totaldiscs"):
+        track_metadata.totaldiscs = format_tags.get("totaldiscs")
+    else:
+        # 如果没有 totaldiscs 字段, 尝试从 discnumber 中提取
+        track_metadata.totaldiscs = parse_number(format_tags.get("disc", format_tags.get("discnumber", "")))[1]
 
     track_metadata.artist = format_tags.get("artist", None)
     track_metadata.title = format_tags.get("title", None)
