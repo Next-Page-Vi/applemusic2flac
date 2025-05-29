@@ -18,7 +18,7 @@
 3. 安装依赖
    ```pip install -r requirements.txt```
 5. 在applemusic2flac运行:
-   ```python -m src.applemusic2flac <source_dir> <dest_dir>```
+   ```python -m src.applemusic2flac <dest_dir> <source_dir>```
 
    
 ## TODO
